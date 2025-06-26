@@ -50,17 +50,30 @@ async def today(ctx):
         return await ctx.respond("This command can only be used in the Spelling Bee channel.", ephemeral=True)
     
     # Get today's embed
-    channel = bot.get_channel(int(serverData[guildID]['channelID']))
-    if channel:
-        messageToUpdate = await channel.fetch_message(serverData[guildID]['messageID'])
-        embed = messageToUpdate.embeds[0]
-        newMessage = await ctx.respond(embed=embed)
-        actualMessage = await newMessage.original_response()
-        serverData[guildID]['messageID'] = actualMessage.id
-        with open("data/serverData.json", "w") as f:
-            json.dump(serverData, f, indent=4)
+    try:
+        channel = bot.get_channel(int(serverData[guildID]['channelID']))
+        if channel and 'messageID' in serverData[guildID]:
+            messageToUpdate = await channel.fetch_message(serverData[guildID]['messageID'])
+            embed = messageToUpdate.embeds[0]
+            
+            # Respond immediately to avoid timeout
+            await ctx.respond("Creating new live stats message...", ephemeral=True)
+            
+            # Create new message with the embed
+            newMessage = await ctx.followup.send(embed=embed)
+            
+            # Update the messageID to the new message
+            serverData[guildID]['messageID'] = newMessage.id
+            with open("data/serverData.json", "w") as f:
+                json.dump(serverData, f, indent=4)
+        else:
+            await ctx.respond("No spelling bee game found for today. Use `/letters` to see today's letters.", ephemeral=True)
+    except discord.NotFound:
+        await ctx.respond("The original spelling bee message was not found. Use `/letters` to see today's letters.", ephemeral=True)
+    except Exception as e:
+        await ctx.respond("An error occurred while fetching today's stats.", ephemeral=True)
 
-@tasks.loop(time=datetime.time(hour=7))
+@tasks.loop(time=datetime.time(hour=7, minute=15))
 async def start_games():
     # Fetch Spelling Bee data
     print("Fetching Spelling Bee data...")
@@ -104,7 +117,6 @@ async def start_games():
     embed.add_field(name="Pangrams:", value=f"0/{len(gameData['pangrams'])}", inline=True)
     embed.add_field(name="Points:", value=f"0/{totalPoints}", inline=True)
     embed.add_field(name="Scores:", value="*No scores yet.*", inline=False)
-    file = discord.File("resources/todays_spelling_bee.png", filename="todays_spelling_bee.png")
     embed.set_image(url="attachment://todays_spelling_bee.png")
 
     # Load server data
@@ -115,6 +127,8 @@ async def start_games():
         channel = bot.get_channel(int(channelID))
         # Send game data to chanel
         if channel:
+            # Create a new file object for each channel
+            file = discord.File("resources/todays_spelling_bee.png", filename="todays_spelling_bee.png")
             message = await channel.send(file=file, embed=embed)
             data["messageID"] = message.id
             data["foundWords"] = []
