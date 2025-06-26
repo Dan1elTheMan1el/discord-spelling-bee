@@ -2,6 +2,8 @@
 
 A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord server! Players can collaborate to find words using the daily letters, track their progress, and compete on a leaderboard.
 
+<img src="resources/demo.png" alt="demo" width="300"/>
+
 ## Features
 
 - **Daily Puzzle Integration**: Automatically fetches the latest NYT Spelling Bee puzzle each day
