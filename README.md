@@ -11,7 +11,7 @@ A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord
 - **Real-time Progress Tracking**: Updates embed with found words, pangrams, and points
 - **Server Leaderboard**: Track individual player scores and rankings
 - **Multi-server Support**: Works across multiple Discord servers simultaneously
-- **Automated Daily Posts**: Automatically posts new puzzles at 12 AM PST daily (7 AM UTC, change to your preference in `discord-spelling-bee.py`)
+- **Automated Daily Posts**: Automatically posts new puzzles at specifide time (Defeault 12AM UTC)
 
 ## Commands
 
@@ -53,6 +53,7 @@ A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord
    Create a `.env` file in the root directory:
    ```env
    DISCORD_TOKEN=your_bot_token_here
+   UTC_TIME=hour_in_24h_UTC_time
    ```
 
 4. **Create Discord Application**

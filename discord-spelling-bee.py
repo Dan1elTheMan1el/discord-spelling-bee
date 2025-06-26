@@ -11,6 +11,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 dotenv.load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+if not DISCORD_TOKEN:
+    raise ValueError("DISCORD_TOKEN environment variable not set.")
+UTC_TIME = os.getenv("UTC_TIME", 0)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -73,7 +76,7 @@ async def today(ctx):
     except Exception as e:
         await ctx.respond("An error occurred while fetching today's stats.", ephemeral=True)
 
-@tasks.loop(time=datetime.time(hour=7, minute=15))
+@tasks.loop(time=datetime.time(hour=UTC_TIME))
 async def start_games():
     # Fetch Spelling Bee data
     print("Fetching Spelling Bee data...")
