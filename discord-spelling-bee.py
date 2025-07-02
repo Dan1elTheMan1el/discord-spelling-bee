@@ -19,11 +19,19 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = discord.Bot(intents=intents)
 
+global serverData
+if not os.path.exists("data/serverData.json"):
+    os.makedirs("data", exist_ok=True)
+    with open("data/serverData.json", "w") as f:
+        json.dump({}, f)
+serverData = json.load(open("data/serverData.json", "r"))
+
 @bot.command(description="Set this channel as the Spelling Bee channel.")
 async def set_channel(ctx):
+    global serverData
+
     # Check if the server data file exists
     guildID = str(ctx.guild.id)
-    serverData = json.load(open("data/serverData.json", "r"))
     if guildID not in serverData:
         serverData[guildID] = {}
     
@@ -45,9 +53,9 @@ async def letters(ctx):
 
 @bot.command(description="Check today's Stats")
 async def today(ctx):
+    global serverData
+
     # Check if channel is correct
-    with open("data/serverData.json", "r") as f:
-        serverData = json.load(f)
     guildID = str(ctx.guild.id)
     if guildID not in serverData or ctx.channel.id != serverData[guildID]['channelID']:
         return await ctx.respond("This command can only be used in the Spelling Bee channel.", ephemeral=True)
@@ -76,8 +84,10 @@ async def today(ctx):
     except Exception as e:
         await ctx.respond("An error occurred while fetching today's stats.", ephemeral=True)
 
-@tasks.loop(time=datetime.time(hour=int(UTC_TIME)))
+@tasks.loop(time=datetime.time(hour=int(UTC_TIME)), reconnect=False)
 async def start_games():
+    global serverData
+
     # Fetch Spelling Bee data
     print("Fetching Spelling Bee data...")
     response = requests.get("https://www.nytimes.com/puzzles/spelling-bee")
@@ -123,7 +133,6 @@ async def start_games():
     embed.set_image(url="attachment://todays_spelling_bee.png")
 
     # Load server data
-    serverData = json.load(open("data/serverData.json", "r"))
     remove = []
     for guildID, data in serverData.items():
         channelID = data["channelID"]
@@ -152,11 +161,12 @@ async def start_games():
 
 @bot.event
 async def on_message(message):
+    global serverData
+
     if message.author == bot.user:
         return
     
     # Load server data
-    serverData = json.load(open("data/serverData.json", "r"))
     guildID = str(message.guild.id)
     if guildID not in serverData or message.channel.id != serverData[guildID]['channelID']:
         return
@@ -209,10 +219,6 @@ async def on_message(message):
 
 @bot.event
 async def on_ready():
-    if not os.path.exists("data/serverData.json"):
-        os.makedirs("data", exist_ok=True)
-        with open("data/serverData.json", "w") as f:
-            json.dump({}, f)
     print("Online!")
     start_games.start()
 bot.run(DISCORD_TOKEN)
