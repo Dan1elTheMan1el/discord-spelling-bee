@@ -125,7 +125,17 @@ async def start_games():
         color=discord.Color.from_rgb(227, 204, 0)
     )
     embed.set_thumbnail(url="https://static01.nyt.com/images/2020/03/23/crosswords/spelling-bee-logo-nytgames-hi-res/spelling-bee-logo-nytgames-hi-res-smallSquare252-v4.png")
-    embed.add_field(name="Letters", value=f":regional_indicator_{gameData['centerLetter']}:, {', '.join(gameData['outerLetters'])}", inline=False)
+
+    if os.path.exists("data/emoji_IDs.json"):
+        with open("data/emoji_IDs.json", "r") as f:
+            emoji_IDs = json.load(f)
+        lettersText = f"<:mid_{gameData['centerLetter']}:{emoji_IDs['mid_' + gameData['centerLetter']]}>"
+        for letter in gameData['outerLetters']:
+            lettersText += f"<:out_{letter}:{emoji_IDs['out_' + letter]}>"
+    else:
+        lettersText = f":regional_indicator_{gameData['centerLetter']}:, {', '.join(gameData['outerLetters'])}"
+
+    embed.add_field(name="Letters", value=lettersText, inline=False)
     embed.add_field(name="Words:", value=f"0/{len(gameData['answers'])}", inline=True)
     embed.add_field(name="Pangrams:", value=f"0/{len(gameData['pangrams'])}", inline=True)
     embed.add_field(name="Points:", value=f"0/{totalPoints}", inline=True)

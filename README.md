@@ -48,6 +48,7 @@ A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord
    ```bash
    pip install -r requirements.txt
    ```
+   Note: Selenium / Chrome driver are only needed for custom emoji uploading
 
 3. **Environment Setup**
    Create a `.env` file in the root directory:
@@ -62,6 +63,13 @@ A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord
    - Go to "Bot" section and create a bot
    - Copy the bot token to your `.env` file
    - Enable "Message Content Intent" in the bot settings
+
+   4.5 **Add Custom Emojis** *(Optional)*
+   - Ensure Chrome is installed
+   - Run `upload-emojis.py`
+   - Log in to Developer Portal
+   - Find your created bot, and navigate to "Emojis"
+   - Script will automatically upload necessary emojis and save IDs to file
 
 5. **Invite Bot to Server**
    - Go to "OAuth2" > "URL Generator"
