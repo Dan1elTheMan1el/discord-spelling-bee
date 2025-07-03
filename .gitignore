@@ -2,6 +2,3 @@
 .env
 venv/
 data/
-emojis/generate-emojis.py
-resources/hexout.png
-resources/hexmid.png

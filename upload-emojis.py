@@ -15,9 +15,7 @@ if os.path.exists("data/emoji_IDs.json"):
 else:
     emoji_IDs = {}
 
-print(emoji_IDs)
-
-# Create undetected Chrome driver (handles anti-detection automatically)
+# Create undetected Chrome driver
 driver = uc.Chrome()
 driver.get("https://discord.com/developers/applications")
 print("Log in and navigate to your application's emojis page.")
@@ -42,7 +40,6 @@ for letter in "abcdefghijklmnopqrstuvwxyz":
         print(f"Emoji Name: {emoji_name}")
         print(f"Emoji ID: {emoji_id}")
 
-        # Store in the emoji_IDs dictionary
         emoji_IDs[emoji_name] = emoji_id
 
 # Save emoji IDs to a file
