@@ -42,14 +42,14 @@ async def set_channel(ctx):
     
     await ctx.respond("Channel set!", ephemeral=True)
 
-@bot.command(description="Send today's Letters")
-async def letters(ctx):
-    file = discord.File("resources/todays_spelling_bee.png", filename="todays_spelling_bee.png")
-    embed = discord.Embed(
-        color=discord.Color.from_rgb(227, 204, 0)
-    )
-    embed.set_image(url="attachment://todays_spelling_bee.png")
-    await ctx.respond(file=file, embed=embed)
+# @bot.command(description="Send today's Letters")
+# async def letters(ctx):
+#     file = discord.File("resources/todays_spelling_bee.png", filename="todays_spelling_bee.png")
+#     embed = discord.Embed(
+#         color=discord.Color.from_rgb(227, 204, 0)
+#     )
+#     embed.set_image(url="attachment://todays_spelling_bee.png")
+#     await ctx.respond(file=file, embed=embed)
 
 @bot.command(description="Check today's Stats")
 async def today(ctx):
@@ -64,25 +64,51 @@ async def today(ctx):
     try:
         channel = bot.get_channel(int(serverData[guildID]['channelID']))
         if channel and 'messageID' in serverData[guildID]:
-            messageToUpdate = await channel.fetch_message(serverData[guildID]['messageID'])
-            embed = messageToUpdate.embeds[0]
-            
             # Respond immediately to avoid timeout
             await ctx.respond("Creating new live stats message...", ephemeral=True)
-            
-            # Create new message with the embed
-            newMessage = await ctx.followup.send(embed=embed)
-            
-            # Update the messageID to the new message
-            serverData[guildID]['messageID'] = newMessage.id
-            with open("data/serverData.json", "w") as f:
-                json.dump(serverData, f, indent=4)
+            await send_info_again(guildID)
         else:
-            await ctx.respond("No spelling bee game found for today. Use `/letters` to see today's letters.", ephemeral=True)
+            await ctx.respond("No spelling bee game found for today.", ephemeral=True)
     except discord.NotFound:
-        await ctx.respond("The original spelling bee message was not found. Use `/letters` to see today's letters.", ephemeral=True)
+        await ctx.respond("The original spelling bee message was not found.", ephemeral=True)
     except Exception as e:
         await ctx.respond("An error occurred while fetching today's stats.", ephemeral=True)
+
+async def send_info_again(guildID):
+    global serverData
+
+    channel = bot.get_channel(int(serverData[guildID]['channelID']))
+
+    try:
+        messageToUpdate = await channel.fetch_message(serverData[guildID]['messageID'])
+    except discord.NotFound:
+        return await channel.send("The original spelling bee message was not found. Please wait for the next game to start.")
+    embed = messageToUpdate.embeds[0]
+
+    # Create new message with the embed
+    newMessage = await channel.send(embed=embed)
+
+    # Update the messageID to the new message
+    serverData[guildID]['messageID'] = newMessage.id
+    serverData[guildID]['messages_since_game'] = 0
+    with open("data/serverData.json", "w") as f:
+        json.dump(serverData, f, indent=4)
+
+@bot.command(description="Set the maximum number of messages before resending the game info.")
+async def messages_between_sends(ctx, max_messages: int):
+    global serverData
+
+    # Check if the server data file exists
+    guildID = str(ctx.guild.id)
+    if guildID not in serverData:
+        serverData[guildID] = {}
+    
+    # Update maxMessages
+    serverData[guildID]['maxMessages'] = max_messages
+    with open("data/serverData.json", "w") as f:
+        json.dump(serverData, f, indent=4)
+    
+    await ctx.respond(f"Maximum messages set to **{max_messages}**.")
 
 @tasks.loop(time=datetime.time(hour=int(UTC_TIME)), reconnect=False)
 async def start_games():
@@ -157,6 +183,7 @@ async def start_games():
             data["userScores"] = {}
             data["pangrams"] = 0
             data["points"] = 0
+            data["messages_since_game"] = 0
         else:
             remove.append(guildID)
     
@@ -180,6 +207,16 @@ async def on_message(message):
     guildID = str(message.guild.id)
     if guildID not in serverData or message.channel.id != serverData[guildID]['channelID']:
         return
+    
+    # Check how many messages sent since game info was last sent
+    if 'messages_since_game' not in serverData[guildID]:
+        serverData[guildID]['messages_since_game'] = 0
+    serverData[guildID]['messages_since_game'] += 1
+    maxMessages = (20 if 'maxMessages' not in serverData[guildID] else serverData[guildID]['maxMessages'])
+    if serverData[guildID]['messages_since_game'] >= maxMessages: # Configure?
+        await send_info_again(guildID)
+    with open("data/serverData.json", "w") as f:
+        json.dump(serverData, f, indent=4)
     
     # Check if the message is a valid word
     word = message.content.strip().lower()
@@ -230,5 +267,6 @@ async def on_message(message):
 @bot.event
 async def on_ready():
     print("Online!")
+    await bot.change_presence(activity=discord.Game("Spelling Bee"))
     start_games.start()
 bot.run(DISCORD_TOKEN)

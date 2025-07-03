@@ -16,8 +16,8 @@ A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord
 ## Commands
 
 - `/set_channel` - Set the current channel as the Spelling Bee channel for your server
-- `/letters` - Show the current puzzle's letter layout
-- `/today` - Display today's puzzle progress and statistics
+- `/today` - Manually display today's puzzle progress and statistics
+- `/messages_between_sends` - Change max number of messages in spelling bee channel before data is sent again (Default: 20)
 
 ## How to Play
 
