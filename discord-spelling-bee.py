@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import dotenv
 import discord
-from discord.ext import tasks
+from discord.ext import tasks, commands
 import datetime
 import random
 from PIL import Image, ImageDraw, ImageFont
@@ -97,7 +97,7 @@ async def send_info_again(guildID):
     with open("data/serverData.json", "w") as f:
         json.dump(serverData, f, indent=4)
 
-@bot.command(description="Set the maximum number of messages before resending the game info.")
+@bot.command(description="Set the maximum number of messages before resending the game info")
 async def messages_between_sends(ctx, max_messages: int):
     global serverData
 
@@ -113,9 +113,21 @@ async def messages_between_sends(ctx, max_messages: int):
     
     await ctx.respond(f"Maximum messages set to **{max_messages}**.")
 
+@bot.command(description="Start the Spelling Bee games manually")
+@commands.is_owner()
+async def start_games_now(ctx):
+    await ctx.respond("Starting Spelling Bee games now...", ephemeral=True)
+    await start_games()
+
 @tasks.loop(time=datetime.time(hour=int(UTC_TIME)), reconnect=False)
 async def start_games():
     global serverData
+
+    # Fetch Spelling Bee data
+    print("Fetching Spelling Bee data...")
+    response = requests.get("https://www.nytimes.com/puzzles/spelling-bee")
+    soup = BeautifulSoup(response.text, "html.parser")
+    gameData = json.loads(soup.find('div', class_='pz-game-screen').find('script').contents[0].replace('window.gameData = ',''))['today']
 
     # Check if version is up to date
     description = f"*{gameData['displayWeekday']}, {gameData['displayDate']}*"
@@ -124,12 +136,6 @@ async def start_games():
         print("Error fetching version file. Please check your internet connection.")
     elif response.text.strip() != version:
         description += f"\n**[Update available: v{response.text.strip()}](https://github.com/Dan1elTheMan1el/discord-spelling-bee)**"
-
-    # Fetch Spelling Bee data
-    print("Fetching Spelling Bee data...")
-    response = requests.get("https://www.nytimes.com/puzzles/spelling-bee")
-    soup = BeautifulSoup(response.text, "html.parser")
-    gameData = json.loads(soup.find('div', class_='pz-game-screen').find('script').contents[0].replace('window.gameData = ',''))['today']
 
     # Calculate total points
     totalPoints = 0

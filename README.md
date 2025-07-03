@@ -1,5 +1,4 @@
 # Discord Spelling Bee Bot 🐝
-v1.0.0
 
 A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord server! Players can collaborate to find words using the daily letters, track their progress, and compete on a leaderboard.
 
@@ -19,6 +18,7 @@ A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord
 - `/set_channel` - Set the current channel as the Spelling Bee channel for your server
 - `/today` - Manually display today's puzzle progress and statistics
 - `/messages_between_sends` - Change max number of messages in spelling bee channel before data is sent again (Default: 20)
+- `/start_games_now` - Start (or restart) today's games for all servers (Bot owner only, for debug purposes)
 
 ## How to Play
 
