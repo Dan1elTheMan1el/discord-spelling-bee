@@ -119,7 +119,7 @@ async def start_games():
 
     # Check if version is up to date
     description = f"*{gameData['displayWeekday']}, {gameData['displayDate']}*"
-    response = requests.get("https://raw.githubusercontent.com/danielfriedman/discord-spelling-bee/main/resources/version.txt")
+    response = requests.get("https://raw.githubusercontent.com/Dan1elTheMan1el/discord-spelling-bee/refs/heads/main/resources/version.txt")
     if response.status_code != 200:
         print("Error fetching version file. Please check your internet connection.")
     elif response.text.strip() != version:
