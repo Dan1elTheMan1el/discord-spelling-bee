@@ -65,13 +65,22 @@ A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord
    - Enable "Message Content Intent" in the bot settings
 
    4.5 **Add Custom Emojis** *(Optional)*
-   - Ensure Chrome is installed
-   - Run `upload-emojis.py`
-   - Log in to Developer Portal
-   - Find your created bot, and navigate to "Emojis"
-   - Script will automatically upload necessary emojis and save IDs to file
+   <div style="display: flex;">
+   <div style="flex: 1;">
 
-5. **Invite Bot to Server**
+      - Ensure Chrome is installed
+      - Run `upload-emojis.py`
+      - Log in to Developer Portal
+      - Find your created bot, and navigate to "Emojis"
+      - Script will automatically upload necessary emojis and save IDs to file
+
+   </div>
+   <div style="flex: 1;">
+       <img src="resources/demo_upload.gif" alt="demo-upload" width="300"/>
+   </div>
+   </div>
+
+   5. **Invite Bot to Server**
    - Go to "OAuth2" > "URL Generator"
    - Select "bot" and "applications.commands" scopes
    - Select necessary permissions:

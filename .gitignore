@@ -2,3 +2,4 @@
 .env
 venv/
 data/
+resources/todays_spelling_bee.png
