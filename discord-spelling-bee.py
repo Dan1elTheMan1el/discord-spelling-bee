@@ -19,6 +19,9 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = discord.Bot(intents=intents)
 
+with open("resources/version.txt", "r") as f:
+    version = f.read().strip()
+
 global serverData
 if not os.path.exists("data/serverData.json"):
     os.makedirs("data", exist_ok=True)
@@ -114,6 +117,14 @@ async def messages_between_sends(ctx, max_messages: int):
 async def start_games():
     global serverData
 
+    # Check if version is up to date
+    description = f"*{gameData['displayWeekday']}, {gameData['displayDate']}*"
+    response = requests.get("https://raw.githubusercontent.com/danielfriedman/discord-spelling-bee/main/resources/version.txt")
+    if response.status_code != 200:
+        print("Error fetching version file. Please check your internet connection.")
+    elif response.text.strip() != version:
+        description += f"\n**[Update available: v{response.text.strip()}](https://github.com/Dan1elTheMan1el/discord-spelling-bee)**"
+
     # Fetch Spelling Bee data
     print("Fetching Spelling Bee data...")
     response = requests.get("https://www.nytimes.com/puzzles/spelling-bee")
@@ -147,7 +158,7 @@ async def start_games():
     # Format the game data
     embed = discord.Embed(
         title="**Today's Spelling Bee**",
-        description=f"*{gameData['displayWeekday']}, {gameData['displayDate']}*",
+        description=description,
         color=discord.Color.from_rgb(227, 204, 0)
     )
     embed.set_thumbnail(url="https://static01.nyt.com/images/2020/03/23/crosswords/spelling-bee-logo-nytgames-hi-res/spelling-bee-logo-nytgames-hi-res-smallSquare252-v4.png")
@@ -167,6 +178,7 @@ async def start_games():
     embed.add_field(name="Points:", value=f"0/{totalPoints}", inline=True)
     embed.add_field(name="Scores:", value="*No scores yet.*", inline=False)
     embed.set_image(url="attachment://todays_spelling_bee.png")
+    embed.set_footer(text=f"v{version}")
 
     # Load server data
     remove = []
@@ -266,7 +278,7 @@ async def on_message(message):
 
 @bot.event
 async def on_ready():
-    print("Online!")
-    await bot.change_presence(activity=discord.Game("Spelling Bee"))
+    print(f"Logged in as {bot.user.name} (ID: {bot.user.id}, Version: {version})")
+    await bot.change_presence(activity=discord.Game(f"Spelling Bee v{version}"))
     start_games.start()
 bot.run(DISCORD_TOKEN)
