@@ -1,7 +1,0 @@
-# flyctl launch added from .gitignore
-**/.DS_Store
-**/.env
-**/venv
-**/data
-**/resources/todays_spelling_bee.png
-fly.toml
