@@ -41,7 +41,7 @@ A Discord bot that brings the New York Times Spelling Bee puzzle to your Discord
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/discord-spelling-bee.git
+   git clone https://github.com/Dan1elTheMan1el/discord-spelling-bee.git
    cd discord-spelling-bee
    ```
 
